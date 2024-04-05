@@ -1,40 +1,44 @@
 ﻿using UnityEngine;
+using SGP4Methods;
 
 public class SatelliteScript : MonoBehaviour
 {
     private string satelliteName;
-    private double[] position;
-    private double[] velocity;
+    private string line1;
+    private string line2;
 
-    public void Initialize(string name, double[] pos, double[] vel)
+    SGP4Lib calc = new SGP4Lib();
+    SGP4Lib.elsetrec satrec = new SGP4Lib.elsetrec();
+
+    double startmfe, stopmfe, deltamin;
+    public double tsince = 0;
+    double[] position = new double[3];
+    double[] velocity = new double[3];
+
+    public void Initialize(string name, string line1, string line2)
     {
         satelliteName = name;
-        position = pos;
-        velocity = vel;
-        transform.position = new Vector3((float)pos[0], (float)pos[1], (float)pos[2])*0.01f;
+        this.line1 = line1;
+        this.line2 = line2;
     }
 
-    // Example method to display satellite information
-    public void DisplaySatelliteInfo()
+    private void calculateAndUpdatePosition()
     {
-        Debug.Log("Satellite Name: " + satelliteName);
-        Debug.Log("Position: (" + position[0] + ", " + position[1] + ", " + position[2] + ")");
-        Debug.Log("Velocity: (" + velocity[0] + ", " + velocity[1] + ", " + velocity[2] + ")");
+        tsince += 1.0 * Time.deltaTime;
+
+        calc.sgp4(ref satrec, tsince, position, velocity);
+        transform.position = new Vector3((float)position[0], (float)position[2], (float)position[1]) * 0.01f;
+    }
+
+    private void Start()
+    {
+        calc.twoline2rv(line1, line2, 'c', 'm', 'a', SGP4Lib.gravconsttype.wgs72, out startmfe, out stopmfe, out deltamin, out satrec);
+        calculateAndUpdatePosition();
     }
 
     private void Update()
     {
-        Vector3 rotationPoint = Vector3.zero;
-        Vector3 direction = new Vector3((float)velocity[0], (float)velocity[1], (float)velocity[2]);
-        float angle = 0.1f;
-
-        Vector3 rotationAxis = Vector3.Cross(direction, transform.position - rotationPoint).normalized;
-
-        // Create a rotation quaternion
-        Quaternion rotation = Quaternion.AngleAxis(angle, rotationAxis);
-
-        // Rotate the object around the rotation point
-        transform.position = rotation * (transform.position - rotationPoint) + rotationPoint;
-
+        //tsince += 0.01;
+        calculateAndUpdatePosition();
     }
 }
