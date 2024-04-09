@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using SGP4Methods;
+using System;
 
 public class SatelliteScript : MonoBehaviour
 {
@@ -11,7 +12,6 @@ public class SatelliteScript : MonoBehaviour
     SGP4Lib.elsetrec satrec = new SGP4Lib.elsetrec();
 
     double startmfe, stopmfe, deltamin;
-    public double tsince = 0;
     double[] position = new double[3];
     double[] velocity = new double[3];
 
@@ -22,10 +22,19 @@ public class SatelliteScript : MonoBehaviour
         this.line2 = line2;
     }
 
+    static DateTime JulianToDateTime(int year, double julianDate)
+    {
+        // Convert Julian date to DateTime
+        DateTime epoch = new DateTime(year, 1, 1);
+        TimeSpan span = TimeSpan.FromDays(julianDate);
+        return epoch + span;
+    }
+
     private void calculateAndUpdatePosition()
     {
-        tsince += 1.0 * Time.deltaTime;
-
+        DateTime currentTime = DateTime.UtcNow;
+        DateTime data = JulianToDateTime(satrec.epochyr + 2000, satrec.epochdays);
+        double tsince = (currentTime - data).TotalMinutes;
         calc.sgp4(ref satrec, tsince, position, velocity);
         transform.position = new Vector3((float)position[0], (float)position[2], (float)position[1]) * 0.01f;
     }
