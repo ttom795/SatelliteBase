@@ -9,7 +9,8 @@ public class SatelliteScript : MonoBehaviour
     private string line2;
 
     SGP4Lib calc = new SGP4Lib();
-    SGP4Lib.elsetrec satrec = new SGP4Lib.elsetrec();
+    public SGP4Lib.elsetrec satrec = new SGP4Lib.elsetrec();
+    public double tsince;
 
     double startmfe, stopmfe, deltamin;
     double[] position = new double[3];
@@ -22,19 +23,8 @@ public class SatelliteScript : MonoBehaviour
         this.line2 = line2;
     }
 
-    static DateTime JulianToDateTime(int year, double julianDate)
+    public void calculateAndUpdatePosition()
     {
-        // Convert Julian date to DateTime
-        DateTime epoch = new DateTime(year, 1, 1);
-        TimeSpan span = TimeSpan.FromDays(julianDate);
-        return epoch + span;
-    }
-
-    private void calculateAndUpdatePosition()
-    {
-        DateTime currentTime = DateTime.UtcNow;
-        DateTime data = JulianToDateTime(satrec.epochyr + 2000, satrec.epochdays);
-        double tsince = (currentTime - data).TotalMinutes;
         calc.sgp4(ref satrec, tsince, position, velocity);
         transform.position = new Vector3((float)position[0], (float)position[2], (float)position[1]) * 0.01f;
     }
@@ -42,12 +32,5 @@ public class SatelliteScript : MonoBehaviour
     private void Start()
     {
         calc.twoline2rv(line1, line2, 'c', 'm', 'a', SGP4Lib.gravconsttype.wgs72, out startmfe, out stopmfe, out deltamin, out satrec);
-        calculateAndUpdatePosition();
-    }
-
-    private void Update()
-    {
-        //tsince += 0.01;
-        calculateAndUpdatePosition();
     }
 }

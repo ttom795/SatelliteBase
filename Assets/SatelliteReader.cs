@@ -3,19 +3,59 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.IO;
+using TMPro;
 
 public class SatelliteReader : MonoBehaviour
 {
     public GameObject satellitePrefab;
     private List<GameObject> satellitesList = new List<GameObject>();
+    public TextMeshProUGUI dataDisplay;
+    private double timeMultiplier = 0;
+    private double accumulatedTime = 0;
+
+    public ParticleSystem visualSatellites;
+
 
     void Start()
     {
         StartCoroutine(LoadSatellites());
     }
 
+    public void multiplierUpdate(float val)
+    {
+        timeMultiplier = val;
+    }
+
     private void Update()
     {
+        accumulatedTime += Time.deltaTime * timeMultiplier;
+        TimeSpan accumulatedTimeSpan = TimeSpan.FromSeconds(accumulatedTime);
+        DateTime convertedDateTime = DateTime.UtcNow.Add(accumulatedTimeSpan);
+
+        ParticleSystem.Particle[] particles = new ParticleSystem.Particle[satellitesList.Count];
+        visualSatellites.GetParticles(particles);
+
+        for (int i = 0; i < satellitesList.Count; i++)
+        {
+            SatelliteScript satScriptReference = satellitesList[i].GetComponent<SatelliteScript>();
+            DateTime data = JulianToDateTime(satScriptReference.satrec.epochyr + 2000, satScriptReference.satrec.epochdays);
+            satScriptReference.tsince = (convertedDateTime - data).TotalMinutes;
+            satScriptReference.calculateAndUpdatePosition();
+
+            particles[i].position = satScriptReference.transform.position;
+            particles[i].startSize = 10f;
+
+        }
+        visualSatellites.SetParticles(particles, satellitesList.Count);
+        dataDisplay.text = convertedDateTime.ToString("UTC yyyy-MM-dd HH:mm:ss") +
+            "\nRunning at " + (timeMultiplier+1) + "x speed";
+    }
+
+    public DateTime JulianToDateTime(int year, double julianDate)
+    {
+        DateTime epoch = new DateTime(year, 1, 1);
+        TimeSpan span = TimeSpan.FromDays(julianDate);
+        return epoch + span;
     }
 
     IEnumerator LoadSatellites()
