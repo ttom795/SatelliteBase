@@ -10,8 +10,8 @@ public class SatelliteReader : MonoBehaviour
     public GameObject satellitePrefab;
     private List<GameObject> satellitesList = new List<GameObject>();
     public TextMeshProUGUI dataDisplay;
-    private double timeMultiplier = 0;
-    private double accumulatedTime = 0;
+    private double timeMultiplier = 1;
+    DateTime reftime;
 
     public ParticleSystem visualSatellites;
 
@@ -19,6 +19,7 @@ public class SatelliteReader : MonoBehaviour
     void Start()
     {
         StartCoroutine(LoadSatellites());
+        reftime = DateTime.UtcNow;
     }
 
     public void multiplierUpdate(float val)
@@ -26,11 +27,22 @@ public class SatelliteReader : MonoBehaviour
         timeMultiplier = val;
     }
 
+    public void offsetTwelve(bool add)
+    {
+        if (add)
+        {
+            reftime = reftime.AddHours(12);
+        }
+        else
+        {
+            reftime = reftime.AddHours(-12);
+        }
+    }
+
     private void Update()
     {
-        accumulatedTime += Time.deltaTime * timeMultiplier;
-        TimeSpan accumulatedTimeSpan = TimeSpan.FromSeconds(accumulatedTime);
-        DateTime convertedDateTime = DateTime.UtcNow.Add(accumulatedTimeSpan);
+        TimeSpan accumulatedTimeSpan = TimeSpan.FromSeconds(Time.deltaTime * timeMultiplier);
+        reftime = reftime.Add(accumulatedTimeSpan);
 
         ParticleSystem.Particle[] particles = new ParticleSystem.Particle[satellitesList.Count];
         visualSatellites.GetParticles(particles);
@@ -39,7 +51,7 @@ public class SatelliteReader : MonoBehaviour
         {
             SatelliteScript satScriptReference = satellitesList[i].GetComponent<SatelliteScript>();
             DateTime data = JulianToDateTime(satScriptReference.satrec.epochyr + 2000, satScriptReference.satrec.epochdays);
-            satScriptReference.tsince = (convertedDateTime - data).TotalMinutes;
+            satScriptReference.tsince = (reftime - data).TotalMinutes;
             satScriptReference.calculateAndUpdatePosition();
 
             particles[i].position = satScriptReference.transform.position;
@@ -47,8 +59,8 @@ public class SatelliteReader : MonoBehaviour
 
         }
         visualSatellites.SetParticles(particles, satellitesList.Count);
-        dataDisplay.text = convertedDateTime.ToString("UTC yyyy-MM-dd HH:mm:ss") +
-            "\nRunning at " + (timeMultiplier+1) + "x speed";
+        dataDisplay.text = reftime.ToString("UTC yyyy-MM-dd HH:mm:ss") +
+            "\nRunning at " + timeMultiplier + "x speed";
     }
 
     public DateTime JulianToDateTime(int year, double julianDate)

@@ -66,6 +66,7 @@
     <Compile Include="Assets\cs\JustCode\MathTimeLib.cs" />
     <Compile Include="Assets\cs\JustCode\SGP4Lib.cs" />
     <Compile Include="Assets\cs\JustCode\testsgp4.cs" />
+    <Compile Include="Assets\GridScript.cs" />
     <Compile Include="Assets\SatelliteReader.cs" />
     <Compile Include="Assets\SatelliteScript.cs" />
     <None Include="Assets\TextMesh Pro\Resources\Shaders\TMP_SDF-Surface-Mobile.shader" />
