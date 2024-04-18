@@ -4,6 +4,7 @@ using UnityEngine;
 using System;
 using System.IO;
 using TMPro;
+using SGP4Methods;
 
 public class SatelliteReader : MonoBehaviour
 {
@@ -12,7 +13,6 @@ public class SatelliteReader : MonoBehaviour
     public TextMeshProUGUI dataDisplay;
     private double timeMultiplier = 1;
     DateTime reftime;
-
     public ParticleSystem visualSatellites;
 
 
@@ -41,12 +41,16 @@ public class SatelliteReader : MonoBehaviour
 
     private void Update()
     {
+
+        // Time management
         TimeSpan accumulatedTimeSpan = TimeSpan.FromSeconds(Time.deltaTime * timeMultiplier);
         reftime = reftime.Add(accumulatedTimeSpan);
 
+        // Satellite visualisation
         ParticleSystem.Particle[] particles = new ParticleSystem.Particle[satellitesList.Count];
         visualSatellites.GetParticles(particles);
 
+        // Satellite updating
         for (int i = 0; i < satellitesList.Count; i++)
         {
             SatelliteScript satScriptReference = satellitesList[i].GetComponent<SatelliteScript>();
@@ -61,6 +65,12 @@ public class SatelliteReader : MonoBehaviour
         visualSatellites.SetParticles(particles, satellitesList.Count);
         dataDisplay.text = reftime.ToString("UTC yyyy-MM-dd HH:mm:ss") +
             "\nRunning at " + timeMultiplier + "x speed";
+
+        // Earth rotation
+        double utcDecimalHours = reftime.TimeOfDay.TotalHours;
+        double utcFractionOfDay = utcDecimalHours / 24.0;
+        float rotationAngle = (float)(utcFractionOfDay * 360.0) * -1f;
+        transform.rotation = Quaternion.Euler(0f, rotationAngle, 0f);
     }
 
     public DateTime JulianToDateTime(int year, double julianDate)

@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using SGP4Methods;
 using System;
+using System.Collections.Generic;
 
 public class SatelliteScript : MonoBehaviour
 {
@@ -15,6 +16,49 @@ public class SatelliteScript : MonoBehaviour
     double startmfe, stopmfe, deltamin;
     double[] position = new double[3];
     double[] velocity = new double[3];
+
+    private LineRenderer lr;
+    private bool renderOverride = false;
+
+    void calculatePoints()
+    {
+        // this took WAY too long to get working (╯°□°）╯︵ ┻━┻
+        int orbitalPeriodMinutes = Mathf.CeilToInt((float)((2.0 * Math.PI) / satrec.nm));
+
+        List<Vector3> linePoints = new List<Vector3>();
+        lr.positionCount = orbitalPeriodMinutes;
+
+        double[] tempPosition = new double[3];
+        double[] tempVelocity = new double[3];
+        for (int i = 0; i < lr.positionCount; i++)
+        {
+            calc.sgp4(ref satrec, tsince+i, tempPosition, tempVelocity);
+            Vector3 futurePosition = new Vector3((float)tempPosition[0], (float)tempPosition[2], (float)tempPosition[1]) * 0.01f;
+            linePoints.Add(futurePosition);
+        }
+
+        lr.SetPositions(linePoints.ToArray());
+    }
+
+    public void renderOrbit(bool toggle)
+    {
+        if (renderOverride == false)
+        {
+            lr.enabled = toggle;
+        }
+    }
+
+    public void permaRender()
+    {
+        if (renderOverride == false)
+        {
+            renderOverride = true;
+            lr.enabled = true;
+        }
+        else {
+            renderOverride = false;
+        }
+    }
 
     public void Initialize(string name, string line1, string line2)
     {
@@ -32,5 +76,14 @@ public class SatelliteScript : MonoBehaviour
     private void Start()
     {
         calc.twoline2rv(line1, line2, 'c', 'm', 'a', SGP4Lib.gravconsttype.wgs72, out startmfe, out stopmfe, out deltamin, out satrec);
+        lr = GetComponent<LineRenderer>();
+    }
+
+    private void Update()
+    {
+        if (lr.enabled)
+        {
+            calculatePoints();
+        }
     }
 }
