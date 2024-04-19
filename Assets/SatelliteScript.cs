@@ -23,20 +23,25 @@ public class SatelliteScript : MonoBehaviour
     void calculatePoints()
     {
         // this took WAY too long to get working (╯°□°）╯︵ ┻━┻
-        int orbitalPeriodMinutes = Mathf.CeilToInt((float)((2.0 * Math.PI) / satrec.nm));
+        double rawOrbitalPeriodMinutes = (2.0 * Math.PI) / satrec.nm;
+        int orbitalPeriodMinutes = (int)Math.Floor(rawOrbitalPeriodMinutes);
+
+        // plan to use this for fractional line rendering, WIP
+        double remainderOrbitalPeriodMinutes = rawOrbitalPeriodMinutes - orbitalPeriodMinutes;
 
         List<Vector3> linePoints = new List<Vector3>();
-        lr.positionCount = orbitalPeriodMinutes;
 
         double[] tempPosition = new double[3];
         double[] tempVelocity = new double[3];
-        for (int i = 0; i < lr.positionCount; i++)
+        for (int i = 0; i < orbitalPeriodMinutes; i++)
         {
             calc.sgp4(ref satrec, tsince+i, tempPosition, tempVelocity);
             Vector3 futurePosition = new Vector3((float)tempPosition[0], (float)tempPosition[2], (float)tempPosition[1]) * 0.01f;
             linePoints.Add(futurePosition);
         }
+  
 
+        lr.positionCount = linePoints.Count;
         lr.SetPositions(linePoints.ToArray());
     }
 
