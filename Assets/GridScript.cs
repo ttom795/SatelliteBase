@@ -27,7 +27,7 @@ public class GridScript : MonoBehaviour
     Vector3 coordinate(int x, int y)
     {
         //x = lng, y = lat
-        return Quaternion.AngleAxis(x, -Vector3.up) * Quaternion.AngleAxis(y, -Vector3.right) * new Vector3(0, 0, (1274.2f / 2) + 2);
+        return Quaternion.AngleAxis(x, -Vector3.up) * Quaternion.AngleAxis(y, -Vector3.right) * new Vector3(0, 0, (6371*0.1f)+3);
     }
 
     void generate()
