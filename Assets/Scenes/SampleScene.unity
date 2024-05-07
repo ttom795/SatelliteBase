@@ -791,7 +791,7 @@ MonoBehaviour:
     R. Mouse = toggle orbital path
 
 
-    V1.2'
+    V1.21 - Orthographic camera'
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -860,10 +860,10 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 0}
-    characterCount: 120
+    characterCount: 143
     spriteCount: 0
-    spaceCount: 26
-    wordCount: 19
+    spaceCount: 29
+    wordCount: 22
     linkCount: 0
     lineCount: 11
     pageCount: 1
