@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
+using TMPro;
 
 public class CameraControls : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class CameraControls : MonoBehaviour
     public float scrollSensitivity = 5f; // Mouse sensitivity
     public float panSensitivity = 0.1f; // Mouse sensitivity
     private Vector3 lastMousePosition;
+    public TextMeshProUGUI highlightName;
 
     GameObject hoveredObject, hoveredObjectLastFrame;
     bool mouseClicked = false;
@@ -21,6 +23,8 @@ public class CameraControls : MonoBehaviour
         {
             hoveredObject = hit.collider.gameObject;
             hoveredObject.GetComponent<SatelliteScript>().renderOrbit(true);
+            string name = hoveredObject.GetComponent<SatelliteScript>().satrec.satnum;
+            highlightName.text = "Hovered: Satellite ID" + name;
             if (Input.GetMouseButton(1) && !mouseClicked)
             {
                 hoveredObject.GetComponent<SatelliteScript>().permaRender();
@@ -56,7 +60,7 @@ public class CameraControls : MonoBehaviour
         // Move camera closer or farther from target with mouse scroll
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         distance -= scroll * scrollSensitivity;
-        distance = Mathf.Clamp(distance, 32f, 500f); // Adjust the min and max distance as needed
+        distance = Mathf.Clamp(distance, 32f, 100f); // Adjust the min and max distance as needed
 
         // Apply changes to camera position
         Camera.main.orthographicSize = distance;

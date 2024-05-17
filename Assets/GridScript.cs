@@ -15,40 +15,82 @@ public class Polygon
     }
 }
 
+
 public class GridScript : MonoBehaviour
 {
-    public List<Vector3> gridPoints;
     public GameObject lr;
+    private int stepLastFrame;
+    private List<GameObject> verticalBands = new List<GameObject>();
+    private List<GameObject> horizontalBands = new List<GameObject>();
 
     public void Start()
     {
-        generate();
+        initBands();
+        generate(1);
     }
+
     Vector3 coordinate(int x, int y)
     {
         //x = lng, y = lat
         return Quaternion.AngleAxis(x, -Vector3.up) * Quaternion.AngleAxis(y, -Vector3.right) * new Vector3(0, 0, (6371*0.1f)+3);
     }
 
-    void generate()
+    float MapValue(float value, float originalMin, float originalMax, float targetMin, float targetMax)
     {
-        int max_distance = 360;
-        int step = 1;
-        for (int y = 0; y < max_distance; y+=step)
+        return (value - originalMin) * (targetMax - targetMin) / (originalMax - originalMin) + targetMin;
+    }
+
+    void Update()
+    {
+        float distance = MapValue(Camera.main.orthographicSize, 32f, 100f, 1f, 20f);
+        int step = (int)Mathf.Round(distance / 5) * 5;
+        step = Mathf.Clamp(step, 1, 20);
+        if (step != stepLastFrame)
+        {
+            generate(step);
+        }
+        stepLastFrame = step;
+    }
+
+
+    void initBands()
+    {
+        for (int y = 0; y < 360; y += 1)
         {
             GameObject bandV = Instantiate(lr, transform);
-            LineRenderer lrV = bandV.GetComponent<LineRenderer>();
-            lrV.positionCount = max_distance/step;
+            LineRenderer lrv = bandV.GetComponent<LineRenderer>();
+            lrv.positionCount = 360;
+            verticalBands.Add(bandV);
 
             GameObject bandH = Instantiate(lr, transform);
-            LineRenderer lrH = bandH.GetComponent<LineRenderer>();
-            lrH.positionCount = max_distance/step;
+            LineRenderer lrh = bandH.GetComponent<LineRenderer>();
+            lrh.positionCount = 360;
+            horizontalBands.Add(bandH);
 
-            for (int x = 0; x < max_distance; x+=step)
+            for (int x = 0; x < 360; x += 1)
             {
-                lrV.SetPosition(x, coordinate(x, y));
-                lrH.SetPosition(x, coordinate(y, x));
-                gridPoints.Add(coordinate(x, y));
+                lrv.SetPosition(x, coordinate(x, y));
+                lrh.SetPosition(x, coordinate(y, x));
+            }
+        }
+    }
+
+    void generate(int step)
+    {
+        for (int y = 0; y < 360; y += 1)
+        {
+            LineRenderer lrv = verticalBands[y].GetComponent<LineRenderer>();
+            LineRenderer lrh = horizontalBands[y].GetComponent<LineRenderer>();
+
+            if (y % step == 0)
+            {
+                lrh.enabled = true;
+                lrv.enabled = true;
+            }
+            else
+            {
+                lrh.enabled = false;
+                lrv.enabled = false;
             }
         }
     }
