@@ -24,7 +24,8 @@ public class CameraControls : MonoBehaviour
             hoveredObject = hit.collider.gameObject;
             hoveredObject.GetComponent<SatelliteScript>().renderOrbit(true);
             string name = hoveredObject.GetComponent<SatelliteScript>().satrec.satnum;
-            highlightName.text = "Hovered: Satellite ID" + name;
+            highlightName.text = "Satellite ID" + name;
+            highlightName.transform.position = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 2f);
             if (Input.GetMouseButton(1) && !mouseClicked)
             {
                 hoveredObject.GetComponent<SatelliteScript>().permaRender();
@@ -35,6 +36,7 @@ public class CameraControls : MonoBehaviour
         {
             hoveredObject = null;
             mouseClicked = false;
+            highlightName.text = "";
         }
 
         if (hoveredObjectLastFrame != hoveredObject)
