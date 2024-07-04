@@ -22,14 +22,21 @@ public class CameraControls : MonoBehaviour
         if (Physics.Raycast(ray, out hit))
         {
             hoveredObject = hit.collider.gameObject;
-            hoveredObject.GetComponent<SatelliteScript>().renderOrbit(true);
-            string name = hoveredObject.GetComponent<SatelliteScript>().satrec.satnum;
-            highlightName.text = "Satellite ID" + name;
-            highlightName.transform.position = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 2f);
-            if (Input.GetMouseButton(1) && !mouseClicked)
-            {
-                hoveredObject.GetComponent<SatelliteScript>().permaRender();
-                mouseClicked = true;
+            SatelliteScript satScript = hoveredObject.GetComponent<SatelliteScript>();
+            if (satScript != null){
+                satScript.renderOrbit(true);
+                string name = hoveredObject.GetComponent<SatelliteScript>().satrec.satnum;
+                highlightName.text = "Satellite ID" + name;
+                highlightName.transform.position = new Vector3(Input.mousePosition.x, Input.mousePosition.y, 2f);
+                if (Input.GetMouseButton(1) && !mouseClicked)
+                {
+                    hoveredObject.GetComponent<SatelliteScript>().permaRender();
+                    mouseClicked = true;
+                }
+            } else {
+                hoveredObject = null;
+                mouseClicked = false;
+                highlightName.text = "";
             }
         }
         else
@@ -62,7 +69,7 @@ public class CameraControls : MonoBehaviour
         // Move camera closer or farther from target with mouse scroll
         float scroll = Input.GetAxis("Mouse ScrollWheel");
         distance -= scroll * scrollSensitivity;
-        distance = Mathf.Clamp(distance, 32f, 100f); // Adjust the min and max distance as needed
+        distance = Mathf.Clamp(distance, 16f, 100f); // Adjust the min and max distance as needed
 
         // Apply changes to camera position
         Camera.main.orthographicSize = distance;
